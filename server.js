@@ -29,9 +29,6 @@ wss.on('connection', (ws) => {
     let outMsg = JSON.stringify(inMsg)
 
     // Broadcast to everyone else.
-
-    console.dir(wss)
-
     wss.clients.forEach(function each(client) {
       if (client !== ws) {
         client.send(outMsg);
