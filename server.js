@@ -25,26 +25,28 @@ wss.on('connection', (ws) => {
 
   ws.on('message', function incoming(message) {
     let inMsg = JSON.parse(message)
-    inMsg['id'] = uuidv1()
-    let outMsg = JSON.stringify(inMsg)
+    let outMsg
 
-    // Broadcast to everyone else.
+    switch (inMsg.type) {
+
+      case "outMessage":
+        inMsg['id'] = uuidv1()
+        inMsg['type'] = 'inMessage'
+        outMsg = JSON.stringify(inMsg)
+        break;
+
+      case "outNotification":
+        inMsg['id'] = uuidv1()
+        inMsg['type'] = 'inNotification'
+         outMsg = JSON.stringify(inMsg)
+    }
+
+    // Broadcast to everyone.
     wss.clients.forEach(function each(client) {
-      if (client !== ws) {
         client.send(outMsg);
-      }
-    });
-
-    //console.log(`User ${outMsg.username} sez: ${outMsg.content}. UUID: ${outMsg.id}`)
+    })
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => console.log('Client disconnected'));
 });
-
-// Broadcast to all.
-// wss.broadcast = function broadcast(data) {
-//   wss.clients.forEach(function each(client) {
-//     client.send(data);
-//   });
-// };
