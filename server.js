@@ -3,11 +3,12 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
 const uuidv1 = require('uuid/v1');
+const randomcolor = require('randomcolor');
 
 // Set the port to 3003
 const PORT = 3003;
 
-const clients = [];
+const clients = {};
 
 // Create a new express server
 const server = express()
@@ -73,7 +74,7 @@ function clientHasConnected(client, clientID) {
 
   clients[clientID] = {
     id: clientID,
-    color: "#0000FF"
+    color: randomcolor({luminosity: 'bright'})
   }
 
   const setupMsg = {
