@@ -7,6 +7,8 @@ const uuidv1 = require('uuid/v1');
 // Set the port to 3003
 const PORT = 3003;
 
+const clients = [];
+
 // Create a new express server
 const server = express()
    // Make the express server serve static assets (html, javascript, css) from the /public folder
@@ -22,10 +24,14 @@ const wss = new SocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('Client connected: ' + wss.clients.size)
-  updateAllUserCounts();
+
+  const clientID = uuidv1()
+
+  clientHasConnected(ws, clientID)
 
   ws.on('message', function incoming(message) {
     let inMsg = JSON.parse(message)
+    console.dir(inMsg)
     let outMsg
 
     switch (inMsg.type) {
@@ -38,26 +44,22 @@ wss.on('connection', (ws) => {
         outMsg = buildOutMessage(inMsg, 'inNotification')
     }
 
-    // Broadcast to everyone.
-    wss.clients.forEach(function each(client) {
-      client.send(outMsg);
-    })
+    wss.broadcast(outMsg)
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {
     console.log('Client disconnected: ' + wss.clients.size)
-    updateAllUserCounts();
+    clientHasDisconnected(clientID)
   });
 });
 
 // Helpers
-function updateAllUserCounts() {
-  const outMsg = JSON.stringify({value: wss.clients.size, type: "inUserUpdate"})
 
+wss.broadcast = function(data) {
   // Broadcast to everyone.
-  wss.clients.forEach(function each(client) {
-      client.send(outMsg);
+  wss.clients.forEach(function (client) {
+    client.send(data);
   })
 }
 
@@ -67,10 +69,40 @@ function buildOutMessage(inMsgJSON, type) {
   return JSON.stringify(inMsgJSON)
 }
 
-// function clientConnected(client, clientID) {
+function clientHasConnected(client, clientID) {
 
-//   clients[clientID] = {
-//     color: #0000FF
-//   }
+  clients[clientID] = {
+    id: clientID,
+    color: "#0000FF"
+  }
 
-// }
+  const setupMsg = {
+    type: "inSetup",
+    id: clientID,
+    clientList: clients
+  }
+
+  const connectMsg = {
+    type: "inConnect",
+    numUsers: wss.clients.size,
+    user: clients[clientID]
+  }
+
+  client.send(JSON.stringify(setupMsg))
+  wss.broadcast(JSON.stringify(connectMsg))
+}
+
+function clientHasDisconnected(clientID) {
+  // handle race condition
+  const client = clients[clientID]
+  if (!client) return
+
+  const disconnectMsg = {
+    type: 'inDisconnect',
+    numUsers: wss.clients.size,
+    user: client
+  }
+
+  wss.broadcast(JSON.stringify(disconnectMsg))
+  delete clients[clientID]
+}
