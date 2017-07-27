@@ -21,7 +21,8 @@ const wss = new SocketServer({ server });
 // the ws parameter in the callback.
 
 wss.on('connection', (ws) => {
-  console.log('Client connected');
+  console.log('Client connected: ' + wss.clients.size)
+  updateAllUserCounts();
 
   ws.on('message', function incoming(message) {
     let inMsg = JSON.parse(message)
@@ -30,23 +31,46 @@ wss.on('connection', (ws) => {
     switch (inMsg.type) {
 
       case "outMessage":
-        inMsg['id'] = uuidv1()
-        inMsg['type'] = 'inMessage'
-        outMsg = JSON.stringify(inMsg)
+        outMsg = buildOutMessage(inMsg, 'inMessage')
         break;
 
       case "outNotification":
-        inMsg['id'] = uuidv1()
-        inMsg['type'] = 'inNotification'
-         outMsg = JSON.stringify(inMsg)
+        outMsg = buildOutMessage(inMsg, 'inNotification')
     }
 
     // Broadcast to everyone.
     wss.clients.forEach(function each(client) {
-        client.send(outMsg);
+      client.send(outMsg);
     })
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected: ' + wss.clients.size)
+    updateAllUserCounts();
+  });
 });
+
+// Helpers
+function updateAllUserCounts() {
+  const outMsg = JSON.stringify({value: wss.clients.size, type: "inUserUpdate"})
+
+  // Broadcast to everyone.
+  wss.clients.forEach(function each(client) {
+      client.send(outMsg);
+  })
+}
+
+function buildOutMessage(inMsgJSON, type) {
+  inMsgJSON['id'] = uuidv1()
+  inMsgJSON['type'] = type
+  return JSON.stringify(inMsgJSON)
+}
+
+// function clientConnected(client, clientID) {
+
+//   clients[clientID] = {
+//     color: #0000FF
+//   }
+
+// }
