@@ -63,8 +63,27 @@ wss.broadcast = function(data) {
 }
 
 function buildOutMessage(inMsgJSON, type) {
+
   inMsgJSON['id'] = uuidv1()
   inMsgJSON['type'] = type
+
+  // Determine if the message content is an image URL. Detects different URL formats, e.g:
+  //
+  // https://www.example.com/test.png
+  // www.example.com/test.png
+  // example.com/test.png
+
+  // Results: [full match, file name, extension, index, original input]
+
+  let imgMatch = inMsgJSON['content'].match(/^.+\/(.+)\.(png|gif|jpg|jpeg|bmp)$/i)
+
+  if (imgMatch) {
+    inMsgJSON['contentType'] = 'image'
+    inMsgJSON['content'] = `<img class="message-image" src="${imgMatch[0]}"/>`
+  } else {
+    inMsgJSON['contentType'] = 'text'
+  }
+
   return JSON.stringify(inMsgJSON)
 }
 
