@@ -64,12 +64,15 @@ wss.broadcast = function(data) {
 
 function buildOutMessage(inMsgJSON, type) {
 
+  debugger
+
   inMsgJSON['id'] = uuidv1()
   inMsgJSON['type'] = type
 
   // Determine if the message content is an image URL. Detects different URL formats, e.g:
   //
   // https://www.example.com/test.png
+  // http://example.com/test.png
   // www.example.com/test.png
   // example.com/test.png
 
