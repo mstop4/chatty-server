@@ -65,7 +65,8 @@ module.exports = function connectHelpers (wss, clients) {
 
     clientHasDisconnected: (clientID) => {
 
-      // handle race condition
+      // handle race condition, in case client disconnects before
+      // the server has added them to the client list
       const client = clients[clientID]
       if (!client) return
 
