@@ -1,3 +1,7 @@
+// connectionHelpers.js
+//
+// Various helper functions for the server
+
 const randomcolor = require('randomcolor')
 const uuidv1 = require('uuid/v1')
 
