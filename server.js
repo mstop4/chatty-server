@@ -1,12 +1,13 @@
 // server.js
 
+require('dotenv').config()
 const express = require('express')
 const SocketServer = require('ws').Server
 const uuidv1 = require('uuid/v1')
 
 // Set the host and port according to env file
-const HOST = '0.0.0.0'
-const PORT = 3003
+const HOST = process.env.HOST || '0.0.0.0'
+const PORT = process.env.PORT || 3003
 
 // Create a new express server
 const server = express()
