@@ -1,4 +1,4 @@
-# Chatty App Server
+# Chatty App Server 💬
 
 The server application for **[Chatty App Client](https://github.com/mstop4/chatty-client)**.
 
