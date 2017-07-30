@@ -1,20 +1,20 @@
 // server.js
 
-require('dotenv').config()
+require('dotenv-safe').load()
 const express = require('express')
 const SocketServer = require('ws').Server
 const uuidv1 = require('uuid/v1')
 
 // Set the host and port according to env file
-const HOST = process.env.HOST || '0.0.0.0'
-const PORT = process.env.PORT || 3003
+const HOST = process.env.SERVER_HOST
+const PORT = process.env.SERVER_PORT
 
 // Create a new express server
 const server = express()
 
  // Make the express server serve static assets (html, javascript, css) from the /public folder
 .use(express.static('public'))
-.listen(PORT, '0.0.0.0', 'localhost', () => console.log(`Running at ${HOST}:${PORT}`))
+.listen(PORT, HOST, () => console.log(`Running at ${HOST}:${PORT}`))
 
 // Create the WebSockets server
 const wss = new SocketServer({ server })
