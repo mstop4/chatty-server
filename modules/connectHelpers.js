@@ -2,8 +2,17 @@ const randomcolor = require('randomcolor')
 const uuidv1 = require('uuid/v1')
 
 module.exports = function connectHelpers (wss, clients) {
+
+  // Broadcast to everyone
+  wss.broadcast = function(data) {
+    wss.clients.forEach(function (client) {
+      client.send(data)
+    })
+  }
+
   return {
 
+    // Constructs client-bound messages in a specific format
     buildMessage: (inMsgJSON, type) => {
 
       inMsgJSON['id'] = uuidv1()
@@ -16,9 +25,8 @@ module.exports = function connectHelpers (wss, clients) {
       // www.example.com/test.png
       // example.com/test.png
 
-      // Results: [full match, file name, extension, index, original input]
-
-      let imgMatch = inMsgJSON['content'].match(/^.+\/(.+)\.(png|gif|jpg|jpeg|bmp)$/i)
+      // Results: [full match, extension, index, original input]
+      let imgMatch = inMsgJSON['content'].match(/^.+\/.+\.(png|gif|jpg|jpeg|bmp)$/i)
 
       if (imgMatch) {
         inMsgJSON['contentType'] = 'image'
@@ -37,12 +45,14 @@ module.exports = function connectHelpers (wss, clients) {
         color: randomcolor({seed: clientID, luminosity: 'bright'})
       }
 
+      // Sets up new client with a list of all existing clients
       const setupMsg = {
         type: "inSetup",
         id: clientID,
         clientList: clients
       }
 
+      // Tells all other clients to add the new client to their list
       const connectMsg = {
         type: "inConnect",
         numUsers: wss.clients.size,

@@ -1,14 +1,21 @@
 {
-  "name": "chatty_server",
+  "name": "chatty-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Server for Chatty client",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mstop4/chatty-server.git"
+  },
+  "keywords": ["chatty"],
+  "author": "Jonathan Lam <mstop4@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/mstop4/chatty",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "dependencies": {
     "express": "^4.15.3",
     "randomcolor": "^0.5.3",
